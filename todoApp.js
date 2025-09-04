@@ -1,25 +1,50 @@
 
-        let input = document.getElementById("task")
-        let submitb = document.getElementById("submitbtn")
-        submitb.addEventListener("click", function(){
-            if(input.value == ""){
-                alert("please enter a task first, before submission")
-            }
-            else{
-                let taskVal = input.value.trim();
-                // console.log(taskVal);
-                
-               let uls = document.getElementById("taskvalues")
-               let li = document.createElement("li")
-               li.innerHTML = taskVal
-               uls.appendChild(li)
-               li.addEventListener("click", function(){
-                   li.classList.toggle("cut")
-                   uls.removeChild(li)
-                })
-                input.value = "";
-            }
-        });
-       
+    const input = document.getElementById("task");
+    const addBtn = document.getElementById("submitbtn");
+    const taskList = document.getElementById("taskvalues");
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    renderTasks();
 
+    addBtn.addEventListener("click", () => {
+      const taskText = input.value.trim();
+      if (taskText === "") return;
 
+      const newTask = { text: taskText, completed: false };
+      tasks.push(newTask);
+      input.value = "";
+      saveTasks();
+      renderTasks();
+    });
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+      tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+        li.className = task.completed ? "completed" : "";
+        li.innerHTML = `
+          <span>${task.text}</span>
+          <div class="actions">
+            <button onclick="toggleComplete(${index})">✔</button>
+            <button onclick="deleteTask(${index})">❌</button>
+          </div>
+        `;
+        taskList.appendChild(li);
+      });
+    }
+
+    function toggleComplete(index) {
+      tasks[index].completed = !tasks[index].completed;
+      saveTasks();
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+    }
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+ 
